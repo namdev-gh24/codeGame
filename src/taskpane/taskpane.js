@@ -6,7 +6,6 @@
 /* global console, document, Excel, Office */
 require("xlsx");
 let file;
-let vehicleChecked;
 let json;
 let result;
 let dropdownValue = "string";
@@ -18,13 +17,11 @@ Office.onReady((info) => {
     document.getElementById("myFile").addEventListener("change", (Event) => {
       file = Event.target.files[0];
       let fileReader = new FileReader();
-      fileReader.readAsBinaryString(file);
+      fileReader.readAsText(file);
       fileReader.onload = (event) => {
         result = event.target.result;
-        let workbook = XLSX.read(result, { type: "binary" });
-        workbook.SheetNames.forEach((sheet) => {
-          let rowObject = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[sheet]);
-        });
+        run();
+        showFields();
       };
     });
 
@@ -33,20 +30,6 @@ Office.onReady((info) => {
     // document.getElementById("ai").onclick = callAI2;
   }
 });
-
-// export async function importData() {
-//   json = JSON.parse(result);
-//   try {
-//     await Excel.run(async (context) => {
-//       let ws = context.workbook.worksheets.getActiveWorksheet();
-//       let range = ws.getRange();
-//       console.log("RANGE IS " + range.cellCount.length);
-//       await context.sync();
-//     });
-//   } catch (error) {
-//     console.error(error);
-//   }
-// }
 
 export function genAI() {
   console.log("Calling AI To Generate Random Names");
@@ -61,7 +44,8 @@ export function genAI() {
 }
 
 export function genRandString(length) {
-  let result = " ";
+  console.log("INSIDE GENRAND");
+  let result = "";
   const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
   const charactersLength = characters.length;
   for (let i = 0; i < length; i++) {
@@ -76,22 +60,51 @@ export function genRandNum(length) {
   result = Math.floor(100000 + Math.random() * max);
   return result;
 }
-
-export function createSelected(dropDownEvent, manipulateEvent, checkBoxEvent) {
-  console.log(dropDownEvent.target.value);
-  console.log(manipulateEvent.target.value);
-  console.log(checkBoxEvent.target.name);
+export function genRandDate(start, end) {
+  return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
 }
+
+export function dropdownEventHandler(dropDownEvent) {
+  var element = dropDownEvent.currentTarget.id.slice(-1);
+  var checkbox_element = document.getElementById("checkboxw" + element);
+  checkbox_element.checked = false;
+  checkbox_element.dispatchEvent(new Event("change"));
+  dropdownValue = dropDownEvent.target.value;
+}
+
+export function drop2downEventHandler(drop2DownEvent) {
+  var element = drop2DownEvent.currentTarget.id.slice(-1);
+  var checkbox_element = document.getElementById("checkboxw" + element);
+  checkbox_element.checked = false;
+  checkbox_element.dispatchEvent(Event("change"));
+  manipulatedValue = drop2DownEvent.target.value;
+}
+
+export function checkBoxEventHandler(checkBoxEvent) {
+  if (checkBoxEvent.target.checked) {
+    selected.push({ [checkBoxEvent.target.name]: [dropdownValue, manipulatedValue] });
+    console.log(Object.entries(selected));
+    dropdownValue = "string";
+    manipulatedValue = "genRand";
+  } else {
+    selected.pop({ [checkBoxEvent.target.name]: [dropdownValue, manipulatedValue] });
+    console.log(Object.entries(selected));
+  }
+}
+
 // created dynamic checkboxes for fields
 export function showFields() {
   json = JSON.parse(result);
   let data = Object.keys(json[0]);
+  selected = [];
+  document.getElementById("cb").innerHTML = "";
 
   const dropdownData = {
     string: "String",
     num: "Numbers",
     date: "Date",
   };
+
   const drop2DownData = {
     genRand: "Generate Random",
     genAI: "Generate By AI",
@@ -139,27 +152,12 @@ export function showFields() {
     document.getElementById("cb").appendChild(container);
   }
   for (var i = 0; i < data.length; i++) {
-    document.getElementById("dropdown" + i).addEventListener("change", (Event) => {
-      dropdownValue = Event.target.value;
-      console.log(dropdownValue);
-    });
-    document.getElementById("drop2down" + i).addEventListener("change", (Event) => {
-      manipulatedValue = Event.target.value;
-    });
-
-    document.getElementById("checkboxw" + i).addEventListener("change", (Event) => {
-      if (Event.target.checked) {
-        selected.push({ [Event.target.name]: [dropdownValue, manipulatedValue] });
-        dropdownValue = "string";
-        manipulatedValue = "genRand";
-        // selected.push(Event.target.name);
-      } else {
-        selected.pop({ [Event.target.name]: [dropdownValue, manipulatedValue] });
-        // selected.pop(Event.target.name);
-      }
-    });
+    document.getElementById("dropdown" + i).addEventListener("change", dropdownEventHandler);
+    document.getElementById("drop2down" + i).addEventListener("change", drop2downEventHandler);
+    document.getElementById("checkboxw" + i).addEventListener("change", checkBoxEventHandler);
   }
 }
+
 export function getType(selected) {
   console.log(selected);
   var result = [];
@@ -189,16 +187,20 @@ export async function run() {
       range.format.autofitColumns();
 
       //manipulating json data
-      console.log("before for loop manupilatin" + selectData);
+      console.log("before for loop manupilatin " + selectData);
       for (var i = 0; i < json.length; i++) {
         for (var j = 0; j < selectData.length; j++) {
+          console.log(selectData[j][1], selectData[j][2]);
           if (selectData[j][1] == "string" && selectData[j][2] == "genRand") {
+            console.log("INSIDE");
             json[i][selectData[j][0]] = genRandString(7);
           }
           if (selectData[j][1] == "num" && selectData[j][2] == "genRand") {
             json[i][selectData[j][0]] = genRandNum(5);
           }
-          // json[i][selectData[j][0]] = "lorem ipsum";
+          if (selectData[j][1] == "date" && selectData[j][2] == "genRand") {
+            json[i][selectData[j][0]] = genRandDate(new Date(2012, 0, 1), new Date());
+          }
         }
       }
 
