@@ -81,7 +81,6 @@ export function genAI() {
 }
 
 export function genRandString(length) {
-  console.log("INSIDE GENRAND");
   let result = "";
   const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
   const charactersLength = characters.length;
@@ -114,7 +113,7 @@ export function drop2downEventHandler(drop2DownEvent) {
   var element = drop2DownEvent.currentTarget.id.slice(-1);
   var checkbox_element = document.getElementById("checkboxw" + element);
   checkbox_element.checked = false;
-  checkbox_element.dispatchEvent(Event("change"));
+  checkbox_element.dispatchEvent(new Event("change"));
   manipulatedValue = drop2DownEvent.target.value;
 }
 
@@ -122,7 +121,6 @@ export function checkBoxEventHandler(checkBoxEvent) {
   var element = checkBoxEvent.currentTarget.id.slice(-1);
   if (checkBoxEvent.target.checked) {
     selected.splice(selected.length, 0, { [checkBoxEvent.target.name]: [dropdownValue, manipulatedValue, element] });
-    console.log(selected);
     dropdownValue = "string";
     manipulatedValue = "genRand";
   } else {
@@ -132,7 +130,6 @@ export function checkBoxEventHandler(checkBoxEvent) {
       }
     });
     selected.splice(y, 1);
-    console.log(selected);
   }
 }
 
@@ -153,7 +150,7 @@ export function showFields() {
   const drop2DownData = {
     genRand: "Generate Random",
     genAI: "Generate By AI",
-    genFile: "Generate From File",
+    encFile: "Encrypt Data",
   };
 
   for (var i = 0; i < data.length; i++) {
@@ -204,7 +201,6 @@ export function showFields() {
 }
 
 export function getType(selected) {
-  console.log(selected);
   var result = [];
   for (var i = 0; i < selected.length; i++) {
     var selectedValues = Object.values(selected)[i];
@@ -212,7 +208,6 @@ export function getType(selected) {
     var type = Object.values(selectedValues)[0][0];
     var manipulate = Object.values(selectedValues)[0][1];
     result.push([selectObject, type, manipulate]);
-    console.log("RESULT IS - " + result);
   }
   return result;
 }
@@ -232,12 +227,9 @@ export async function run() {
       range.format.autofitColumns();
 
       //manipulating json data
-      console.log("before for loop manupilatin " + selectData);
       for (var i = 0; i < json.length; i++) {
         for (var j = 0; j < selectData.length; j++) {
-          console.log(selectData[j][1], selectData[j][2]);
           if (selectData[j][1] == "string" && selectData[j][2] == "genRand") {
-            console.log("INSIDE");
             json[i][selectData[j][0]] = genRandString(7);
           }
           if (selectData[j][1] == "num" && selectData[j][2] == "genRand") {
@@ -245,6 +237,9 @@ export async function run() {
           }
           if (selectData[j][1] == "date" && selectData[j][2] == "genRand") {
             json[i][selectData[j][0]] = genRandDate(new Date(2012, 0, 1), new Date());
+          }
+          if (selectData[j][2] == "encFile") {
+            json[i][selectData[j][0]] = md5(json[i][selectData[j][0]]);
           }
         }
       }
