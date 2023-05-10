@@ -28,8 +28,6 @@ Office.onReady((info) => {
         workbook.SheetNames.forEach(sheet => {
           let rowObject = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[sheet]);
           console.log(rowObject);
-
-
         });
       }
 
@@ -37,8 +35,6 @@ Office.onReady((info) => {
 
     document.getElementById("run").onclick = run;
     document.getElementById("show").onclick = showFields;
-
-
   }
 });
 
@@ -46,7 +42,7 @@ Office.onReady((info) => {
 export function showFields() {
   json = JSON.parse(result);
   let data = Object.keys(json[0]);
-  
+
   for (var i = 0; i < data.length; i++) {
     var container = document.createElement('div');
     var checkbox = document.createElement('input');
@@ -66,14 +62,14 @@ export function showFields() {
   for (var i = 0; i < data.length; i++) {
     document.getElementById("checkboxw" + i).addEventListener("change", (Event) => {
       console.log(Event);
-      if(Event.target.checked){
+      if (Event.target.checked) {
         selected.push(Event.target.name);
       }
       else {
-        console.log(Event.target.name+"  POPPED");
+        console.log(Event.target.name + "  POPPED");
         selected.pop(Event.target.name);
       }
-      
+
     });
   }
 
@@ -97,16 +93,16 @@ export async function run() {
       range.format.autofitColumns();
 
       //manipulating json data
-      console.log("before for loop manupilatin"+selected[0]);
-      for (var i=0 ;i<json.length;i++){
+      console.log("before for loop manupilatin" + selected[0]);
+      for (var i = 0; i < json.length; i++) {
         for (var j = 0; j < selected.length; j++) {
           json[i][selected[j]] = "lorem ipsum";
-          
+
         }
       }
 
-        
-      
+
+
 
       // add data to excel from json
       let data3 = [];
@@ -128,7 +124,29 @@ export async function run() {
 
 
     });
+    parseData();
   } catch (error) {
     console.error(error);
+  }
+
+  function parseData() {
+    // Get the current worksheet
+    var sheet = Office.context.document.workbook.worksheets.getActiveWorksheet();
+
+    // Define the dynamic range of cells to parse
+    var range = sheet.getUsedRange();
+
+    // Load the values of the cells in the range
+    range.load("values");
+
+    // Run a batch operation to get the cell values
+    Office.context.document.batch(function (batch) {
+      batch.sync();
+      // Access the cell values after the batch operation has completed
+      var cellValues = range.values;
+      // Parse the data as needed
+      // ...
+      console.log(cellValues);
+    });
   }
 }
