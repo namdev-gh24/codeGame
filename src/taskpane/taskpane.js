@@ -10,26 +10,111 @@ let json;
 let result;
 let dropdownValue = "string";
 let manipulatedValue = "genRand";
+let manipulatedData = [];
 let selected = [];
+let rows = [];
+let columns;
+let dropdownData = {
+  string: "String",
+  num: "Numbers",
+  date: "Date",
+};
+
+let drop2DownData = {
+  genRand: "Generate Random",
+  genAI: "Generate By AI",
+  encFile: "Encrypt Data",
+};
 
 Office.onReady((info) => {
   if (info.host === Office.HostType.Excel) {
     document.getElementById("myFile").addEventListener("change", (Event) => {
       file = Event.target.files[0];
+      var ext = file.name.split(".")[1];
       let fileReader = new FileReader();
       fileReader.readAsText(file);
       fileReader.onload = (event) => {
         result = event.target.result;
-        run();
-        showFields();
+        if (ext == "json") {
+          loadJSONFile();
+        } else if (ext == "xml") {
+          loadXMLFile();
+        } else {
+          console.error("[-] Choose Appropriate File");
+        }
       };
     });
-
-    document.getElementById("run").onclick = run;
+    document.getElementById("run").onclick = manipulateData;
     document.getElementById("show").onclick = showFields;
     document.getElementById("ai").onclick = genAI;
+    document.getElementById("exportToXML").addEventListener("click", () => {
+      function OBJtoXML(obj) {
+        var xml = "";
+        for (var prop in obj) {
+          xml += "<" + prop + ">";
+          if (obj[prop] instanceof Array) {
+            for (var array in obj[prop]) {
+              xml += OBJtoXML(new Object(obj[prop][array]));
+            }
+          } else if (typeof obj[prop] == "object") {
+            xml += OBJtoXML(new Object(obj[prop]));
+          } else {
+            xml += obj[prop];
+          }
+          xml += "</" + prop + ">";
+        }
+        var xml = xml.replace(/(<\/[0-9]>)+/g, "</" + "tag" + ">");
+        xml = xml.replace(/(<[0-9]>)+/g, "<" + "tag" + ">");
+        return xml;
+      }
+      var xmltext = "<body>" + OBJtoXML(json) + "</body>";
+      var a = document.createElement("a");
+      a.href = window.URL.createObjectURL(new Blob([xmltext], { type: "text/xml" }));
+      a.download = "demo.xml";
+      a.click();
+    });
+
+    document.getElementById("exportToJSON").addEventListener("click", () => {
+      var a = document.createElement("a");
+      var file = new Blob([JSON.stringify(rows)], { type: "text/plain" });
+      a.href = URL.createObjectURL(file);
+      a.download = "demo.json";
+      a.click();
+    });
   }
 });
+
+export function OBJtoXML() {}
+
+export async function loadJSONFile() {
+  json = JSON.parse(result);
+  try {
+    await Excel.run(async (context) => {
+      let ws = context.workbook.worksheets.getActiveWorksheet();
+      let range = ws.getRange("A1:D1");
+      let range2 = ws.getRange("A2:D8");
+      let data = new Array(Object.keys(json[0]));
+      range.values = data;
+      range.format.autofitColumns();
+
+      let data3 = [];
+      for (let i = 0; i < json.length; i++) {
+        data3.push(Object.values(json[i]));
+      }
+      range2.values = data3;
+      range2.format.autofitColumns();
+
+      await context.sync();
+    });
+  } catch (error) {
+    console.error(error);
+  }
+  showFields();
+}
+
+export function loadXMLFile() {
+  console.error("EXCEL SE IMPORT KARLE BHAI");
+}
 
 export function genAI() {
   console.log("Calling AI To Generate Random Names");
@@ -41,7 +126,7 @@ export function genAI() {
   //     console.log(data.results);
   //     // Access your data here
   //   });
-  const apiKey = "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";
+  const apiKey = "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";
 
   // Set the API endpoint URL
   const apiUrl = "https://api.openai.com/v1/engines/davinci/completions";
@@ -119,85 +204,110 @@ export function drop2downEventHandler(drop2DownEvent) {
 
 export function checkBoxEventHandler(checkBoxEvent) {
   var element = checkBoxEvent.currentTarget.id.slice(-1);
+  console.log(element);
   if (checkBoxEvent.target.checked) {
+    document.getElementById("dropdown" + element).disabled = false;
+    document.getElementById("dropdown" + element).hidden = false;
+    document.getElementById("drop2down" + element).hidden = false;
+    document.getElementById("drop2down" + element).disabled = false;
     selected.splice(selected.length, 0, { [checkBoxEvent.target.name]: [dropdownValue, manipulatedValue, element] });
     dropdownValue = "string";
     manipulatedValue = "genRand";
+    console.log("CHECKED - " + selected);
   } else {
+    document.getElementById("dropdown" + element).disabled = true;
+    document.getElementById("dropdown" + element).hidden = true;
+    document.getElementById("drop2down" + element).hidden = true;
+    document.getElementById("drop2down" + element).disabled = true;
     let y = selected.findIndex(() => {
       for (let i = 0; i < selected.length; i++) {
         return Object.values(selected[i])[0][2] == element;
       }
     });
-    selected.splice(y, 1);
+    console.log(y);
+    console.log("UNCHECKED BEFORE - " + Object.values(selected));
+    if (y != -1) {
+      selected.splice(y, 1);
+    }
+    console.log("UNCHECKED AFTER - " + Object.values(selected));
   }
 }
 
 // created dynamic checkboxes for fields
-export function showFields() {
-  json = JSON.parse(result);
-  let data = Object.keys(json[0]);
+export async function showFields() {
   selected = [];
-  run();
   document.getElementById("cb").innerHTML = "";
 
-  const dropdownData = {
-    string: "String",
-    num: "Numbers",
-    date: "Date",
-  };
+  Excel.run(async (context) => {
+    let sheet = context.workbook.worksheets.getActiveWorksheet();
+    var selectedRange = sheet.getUsedRange();
+    selectedRange.load("values");
 
-  const drop2DownData = {
-    genRand: "Generate Random",
-    genAI: "Generate By AI",
-    encFile: "Encrypt Data",
-  };
+    await context.sync().then(function () {
+      json = selectedRange.values;
+      columns = json[0];
+      for (var i = 1; i < json.length; i++) {
+        var row = {};
+        for (var j = 0; j < json[i].length; j++) {
+          row[columns[j]] = json[i][j];
+        }
+        rows.push(row);
+      }
+      let data = Object.keys(rows[0]);
 
-  for (var i = 0; i < data.length; i++) {
-    var container = document.createElement("div");
-    var checkbox = document.createElement("input");
+      for (var i = 0; i < data.length; i++) {
+        var container = document.createElement("div");
+        var checkbox = document.createElement("input");
 
-    checkbox.type = "checkbox";
-    checkbox.name = data[i];
-    checkbox.value = data[i];
-    checkbox.id = "checkboxw" + i;
+        checkbox.type = "checkbox";
+        checkbox.name = data[i];
+        checkbox.value = data[i];
+        checkbox.id = "checkboxw" + i;
 
-    var dropdown = document.createElement("select");
-    dropdown.id = "dropdown" + i;
-    for (let data in dropdownData) {
-      let option = document.createElement("option");
-      option.setAttribute("value", data);
-      let optiontext = document.createTextNode(dropdownData[data]);
-      option.appendChild(optiontext);
-      dropdown.appendChild(option);
-    }
+        var dropdown = document.createElement("select");
+        dropdown.id = "dropdown" + i;
+        dropdown.disabled = true;
+        dropdown.hidden = true;
+        for (let data in dropdownData) {
+          let option = document.createElement("option");
+          option.setAttribute("value", data);
+          let optiontext = document.createTextNode(dropdownData[data]);
+          option.appendChild(optiontext);
+          dropdown.appendChild(option);
+        }
 
-    var drop2down = document.createElement("select");
-    drop2down.id = "drop2down" + i;
-    for (let data in drop2DownData) {
-      let option = document.createElement("option");
-      option.setAttribute("value", data);
+        var drop2down = document.createElement("select");
+        drop2down.id = "drop2down" + i;
+        drop2down.disabled = true;
+        drop2down.hidden = true;
+        for (let data in drop2DownData) {
+          let option = document.createElement("option");
+          option.setAttribute("value", data);
 
-      let optiontext = document.createTextNode(drop2DownData[data]);
-      option.appendChild(optiontext);
-      drop2down.appendChild(option);
-    }
+          let optiontext = document.createTextNode(drop2DownData[data]);
+          option.appendChild(optiontext);
+          drop2down.appendChild(option);
+        }
 
-    var label = document.createElement("label");
-    label.htmlFor = "checkboxw";
-    label.appendChild(document.createTextNode(data[i]));
+        var label = document.createElement("label");
+        label.htmlFor = "checkboxw";
+        label.appendChild(document.createTextNode(data[i]));
 
-    container.appendChild(checkbox);
-    container.appendChild(label);
-    container.appendChild(dropdown);
-    container.appendChild(drop2down);
-    document.getElementById("cb").appendChild(container);
-  }
-  for (var i = 0; i < data.length; i++) {
-    document.getElementById("dropdown" + i).addEventListener("change", dropdownEventHandler);
-    document.getElementById("drop2down" + i).addEventListener("change", drop2downEventHandler);
-    document.getElementById("checkboxw" + i).addEventListener("change", checkBoxEventHandler);
-  }
+        container.appendChild(checkbox);
+        container.appendChild(label);
+        container.appendChild(dropdown);
+        container.appendChild(drop2down);
+        document.getElementById("cb").appendChild(container);
+      }
+      for (var i = 0; i < data.length; i++) {
+        document.getElementById("dropdown" + i).addEventListener("change", dropdownEventHandler);
+        document.getElementById("drop2down" + i).addEventListener("change", drop2downEventHandler);
+        document.getElementById("checkboxw" + i).addEventListener("change", checkBoxEventHandler);
+      }
+    });
+  }).catch(function (error) {
+    console.log(error);
+  });
 }
 
 export function getType(selected) {
@@ -212,54 +322,40 @@ export function getType(selected) {
   return result;
 }
 
-export async function run() {
+export async function manipulateData() {
   var selectData = getType(selected);
-  json = JSON.parse(result);
+  document.getElementById;
+  manipulatedData = rows;
   try {
     await Excel.run(async (context) => {
-      // setup workbook and sheet column heading
-      let ws = context.workbook.worksheets.getActiveWorksheet();
-      let range = ws.getRange("A1:D1");
-      let range2 = ws.getRange("A2:D8");
-      let data = new Array(Object.keys(json[0]));
-      range.values = data;
-
-      range.format.autofitColumns();
-
-      //manipulating json data
-      for (var i = 0; i < json.length; i++) {
+      for (var i = 0; i < rows.length; i++) {
         for (var j = 0; j < selectData.length; j++) {
           if (selectData[j][1] == "string" && selectData[j][2] == "genRand") {
-            json[i][selectData[j][0]] = genRandString(7);
+            manipulatedData[i][selectData[j][0]] = genRandString(7);
           }
           if (selectData[j][1] == "num" && selectData[j][2] == "genRand") {
-            json[i][selectData[j][0]] = genRandNum(5);
+            manipulatedData[i][selectData[j][0]] = genRandNum(5);
           }
           if (selectData[j][1] == "date" && selectData[j][2] == "genRand") {
-            json[i][selectData[j][0]] = genRandDate(new Date(2012, 0, 1), new Date());
+            manipulatedData[i][selectData[j][0]] = genRandDate(new Date(2012, 0, 1), new Date());
           }
           if (selectData[j][2] == "encFile") {
-            json[i][selectData[j][0]] = md5(json[i][selectData[j][0]]);
+            manipulatedData[i][selectData[j][0]] = md5(json[i][selectData[j][0]]);
           }
         }
       }
-
-      // add data to excel from json
-      let data3 = [];
-      for (let i = 0; i < json.length; i++) {
-        let data2 = [];
-        data2.push(json[i].Vehicle);
-        data2.push(json[i].Date);
-        data2.push(json[i].Location);
-        data2.push(json[i].Speed);
-
-        data3.push(data2);
-      }
-      range2.values = data3;
-      range2.format.autofitColumns();
-
-      await context.sync();
-      // console.log(ws);
+      let ws = context.workbook.worksheets.getActiveWorksheet();
+      let range = ws.getUsedRange();
+      range.load("values");
+      await context.sync().then(function () {
+        let data3 = [];
+        for (var i = 0; i < rows.length; i++) {
+          data3.push(Object.values(manipulatedData[i]));
+        }
+        data3.splice(0, 0, columns);
+        range.values = data3;
+        range.format.autofitColumns();
+      });
     });
   } catch (error) {
     console.error(error);
