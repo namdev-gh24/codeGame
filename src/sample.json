@@ -1,49 +1,44 @@
-[{
-    "firstName":"Shubham",
-    "lastName":"Verma",
-    "email":"example@gmail.com",
-    "Mob:":1234567890,
-    "country":"India"
+[
+    {
+        "Vehicle": "BMW",
+        "Date": "30, Jul 2013 09:24 AM",
+        "Location": "Hauz Khas, Enclave, New Delhi, Delhi, India",
+        "Speed": 42
     },
     {
-    "firstName":"Shubham",
-    "lastName":"Verma",
-    "email":"example@gmail.com",
-    "Mob:":1234567890,
-    "country":"India"
+        "Vehicle": "Honda CBR",
+        "Date": "30, Jul 2013 12:00 AM",
+        "Location": "Military Road,  West Bengal 734013,  India",
+        "Speed": 0
     },
     {
-    "firstName":"Shubham",
-    "lastName":"Verma",
-    "email":"example@gmail.com",
-    "Mob:":1234567890,
-    "country":"India"
+        "Vehicle": "Supra",
+        "Date": "30, Jul 2013 07:53 AM",
+        "Location": "Sec-45, St. Angel's School, Gurgaon, Haryana, India",
+        "Speed": 58
     },
     {
-    "firstName":"Shubham",
-    "lastName":"Verma",
-    "email":"example@gmail.com",
-    "Mob:":1234567890,
-    "country":"India"
+        "Vehicle": "Land Cruiser",
+        "Date": "30, Jul 2013 09:35 AM",
+        "Location": "DLF Phase I, Marble Market, Gurgaon, Haryana, India",
+        "Speed": 83
     },
     {
-    "firstName":"Shubham",
-    "lastName":"Verma",
-    "email":"example@gmail.com",
-    "Mob:":1234567890,
-    "country":"India"
+        "Vehicle": "Suzuki Swift",
+        "Date": "30, Jul 2013 12:02 AM",
+        "Location": "Behind Central Bank RO, Ram Krishna Rd by-lane, Siliguri, West Bengal, India",
+        "Speed": 0
     },
     {
-    "firstName":"Shubham",
-    "lastName":"Verma",
-    "email":"example@gmail.com",
-    "Mob:":1234567890,
-    "country":"India"
+        "Vehicle": "Honda Civic",
+        "Date": "30, Jul 2013 12:00 AM",
+        "Location": "Behind Central Bank RO, Ram Krishna Rd by-lane, Siliguri, West Bengal, India",
+        "Speed": 0
     },
     {
-    "firstName":"Shubham",
-    "lastName":"Verma",
-    "email":"example@gmail.com",
-    "Mob:":1234567890,
-    "country":"India"
-    }]
+        "Vehicle": "Honda Accord",
+        "Date": "30, Jul 2013 11:05 AM",
+        "Location": "DLF Phase IV, Super Mart 1, Gurgaon, Haryana, India",
+        "Speed": 71
+    }
+]

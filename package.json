@@ -32,7 +32,9 @@
     "express": "^4.18.2",
     "fs": "^0.0.1-security",
     "regenerator-runtime": "^0.13.7",
-    "xlsx": "^0.18.5"
+    "xlsx": "^0.18.5",
+    "xml-js": "^1.6.11",
+    "xml2js": "^0.5.0"
   },
   "devDependencies": {
     "@babel/core": "^7.13.10",
@@ -40,6 +42,7 @@
     "@babel/preset-typescript": "^7.13.0",
     "@types/office-js": "^1.0.256",
     "@types/office-runtime": "^1.0.23",
+    "@types/xml2js": "^0.4.11",
     "acorn": "^8.5.0",
     "babel-loader": "^8.2.2",
     "copy-webpack-plugin": "^9.0.1",

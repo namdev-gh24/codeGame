@@ -8,30 +8,29 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Contoso Task Pane Add-in</title>
+    <title>Data Sanitize Task Pane Add-in</title>
 
     <!-- Office JavaScript API -->
     <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1.1/hosted/office.js"></script>
-
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.18.0/js/md5.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.2/xlsx.full.min.js"></script>
-
     <!-- For more information on Fluent UI, visit https://developer.microsoft.com/fluentui#/. -->
     <link rel="stylesheet"
         href="https://static2.sharepointonline.com/files/fabric/office-ui-fabric-core/11.0.0/css/fabric.min.css" />
-
     <!-- Template styles -->
     <link href="taskpane.css" rel="stylesheet" type="text/css" />
 </head>
 
 <body class="ms-font-m ms-welcome ms-Fabric">
-    <input type="file" id="myFile" name="filename" accept=".json"><br><br>
-    
-    <button id="show" type="submit">Show fields</button><br><br>
+    <input type="file" id="myFile" name="filename"><br><br>
     <div id="cb"></div><br><br>
-    <button id="run" type="submit">Manipulate selected fields</button>
+    <button id="show" type="submit">Clear</button><br><br>
+    <button id="run" type="submit">Manipulate Data</button><br><br>
+    <button type="submit" id="ai"> Generate Names using AI</button><br><br>
 
-    
-
+    <input id="exportToXML" type="radio" value="exportToXM" name="group1">Export To XML</input>
+    <input id="exportToJSON" type="radio" value="exportToJSON" name="group1">Export To JSON</input>
 </body>
 
 </html>
