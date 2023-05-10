@@ -27,20 +27,57 @@ Office.onReady((info) => {
 
     document.getElementById("run").onclick = run;
     document.getElementById("show").onclick = showFields;
-    // document.getElementById("ai").onclick = callAI2;
+    document.getElementById("ai").onclick = genAI;
   }
 });
 
 export function genAI() {
   console.log("Calling AI To Generate Random Names");
-  fetch("https://randomuser.me/api/?results=4")
-    .then((results) => {
-      return results.json();
-    })
-    .then((data) => {
-      console.log(data.results);
-      // Access your data here
-    });
+  // fetch("https://randomuser.me/api/?results=4")
+  //   .then((results) => {
+  //     return results.json();
+  //   })
+  //   .then((data) => {
+  //     console.log(data.results);
+  //     // Access your data here
+  //   });
+  const apiKey = "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";
+
+  // Set the API endpoint URL
+  const apiUrl = "https://api.openai.com/v1/engines/davinci/completions";
+
+  // Set the request headers
+  const headers = {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${apiKey}`,
+  };
+
+  // Set the request body
+  const body = {
+    prompt: "List of vehicle names:\n- Car\n- Truck\n- Bus\n- Motorcycle\n- Bicycle\n",
+    temperature: 0.5,
+    max_tokens: 5,
+    n: 5,
+    stop: "\n",
+  };
+
+  // Send the API request using jQuery
+  $.ajax({
+    type: "POST",
+    url: apiUrl,
+    headers: headers,
+    data: JSON.stringify(body),
+    success: function (response) {
+      // Parse the response JSON
+      const choices = response.choices; // Extract the text from each choice
+      const vehicleNames = choices.map((choice) => choice.text.trim()); // Log the array of vehicle names
+      console.log(vehicleNames);
+    },
+    error: function (xhr, status, error) {
+      // Log an error message if the request failed
+      console.error("Request failed. Returned status of " + xhr.status + ". Error message: " + error);
+    },
+  });
 }
 
 export function genRandString(length) {
@@ -60,6 +97,7 @@ export function genRandNum(length) {
   result = Math.floor(100000 + Math.random() * max);
   return result;
 }
+
 export function genRandDate(start, end) {
   return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
 }
@@ -81,14 +119,20 @@ export function drop2downEventHandler(drop2DownEvent) {
 }
 
 export function checkBoxEventHandler(checkBoxEvent) {
+  var element = checkBoxEvent.currentTarget.id.slice(-1);
   if (checkBoxEvent.target.checked) {
-    selected.push({ [checkBoxEvent.target.name]: [dropdownValue, manipulatedValue] });
-    console.log(Object.entries(selected));
+    selected.splice(selected.length, 0, { [checkBoxEvent.target.name]: [dropdownValue, manipulatedValue, element] });
+    console.log(selected);
     dropdownValue = "string";
     manipulatedValue = "genRand";
   } else {
-    selected.pop({ [checkBoxEvent.target.name]: [dropdownValue, manipulatedValue] });
-    console.log(Object.entries(selected));
+    let y = selected.findIndex(() => {
+      for (let i = 0; i < selected.length; i++) {
+        return Object.values(selected[i])[0][2] == element;
+      }
+    });
+    selected.splice(y, 1);
+    console.log(selected);
   }
 }
 
@@ -97,6 +141,7 @@ export function showFields() {
   json = JSON.parse(result);
   let data = Object.keys(json[0]);
   selected = [];
+  run();
   document.getElementById("cb").innerHTML = "";
 
   const dropdownData = {
