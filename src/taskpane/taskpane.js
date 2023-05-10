@@ -126,7 +126,7 @@ export function genAI() {
   //     console.log(data.results);
   //     // Access your data here
   //   });
-  const apiKey = "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";
+  const apiKey = "SECRET_KEY";
 
   // Set the API endpoint URL
   const apiUrl = "https://api.openai.com/v1/engines/davinci/completions";
