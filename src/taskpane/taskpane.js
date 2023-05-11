@@ -22,8 +22,9 @@ let dropdownData = {
 
 let drop2DownData = {
   genRand: "Generate Random",
-  genAI: "Generate By AI",
   encFile: "Encrypt Data",
+  genFile: "Generate From File",
+  genAI: "Generate By AI",
 };
 
 Office.onReady((info) => {
@@ -45,7 +46,7 @@ Office.onReady((info) => {
       };
     });
     document.getElementById("run").onclick = manipulateData;
-    document.getElementById("show").onclick = showFields;
+    document.getElementById("clear").onclick = clearData;
     document.getElementById("ai").onclick = genAI;
     document.getElementById("exportToXML").addEventListener("click", () => {
       function OBJtoXML(obj) {
@@ -67,7 +68,7 @@ Office.onReady((info) => {
         xml = xml.replace(/(<[0-9]>)+/g, "<" + "tag" + ">");
         return xml;
       }
-      var xmltext = "<body>" + OBJtoXML(json) + "</body>";
+      var xmltext = "<body>" + OBJtoXML(manipulatedData) + "</body>";
       var a = document.createElement("a");
       a.href = window.URL.createObjectURL(new Blob([xmltext], { type: "text/xml" }));
       a.download = "demo.xml";
@@ -76,7 +77,7 @@ Office.onReady((info) => {
 
     document.getElementById("exportToJSON").addEventListener("click", () => {
       var a = document.createElement("a");
-      var file = new Blob([JSON.stringify(rows)], { type: "text/plain" });
+      var file = new Blob([JSON.stringify(manipulatedData)], { type: "text/plain" });
       a.href = URL.createObjectURL(file);
       a.download = "demo.json";
       a.click();
@@ -84,8 +85,20 @@ Office.onReady((info) => {
   }
 });
 
-export function OBJtoXML() {}
-
+export function clearData() {
+  selected = [];
+  var data = Object.keys(rows[0]);
+  console.log(selected);
+  for (var i = 0; i < data.length; i++) {
+    var checkbox_element = document.getElementById("checkboxw" + i);
+    checkbox_element.checked = false;
+    checkbox_element.dispatchEvent(new Event("change"));
+    var dropdown_element = document.getElementById("dropdown" + i);
+    dropdown_element.selected = "string";
+    var drop2down_element = document.getElementById("drop2down" + i);
+    drop2down_element.selected = "genRand";
+  }
+}
 export async function loadJSONFile() {
   json = JSON.parse(result);
   try {
@@ -331,7 +344,7 @@ export async function manipulateData() {
       for (var i = 0; i < rows.length; i++) {
         for (var j = 0; j < selectData.length; j++) {
           if (selectData[j][1] == "string" && selectData[j][2] == "genRand") {
-            manipulatedData[i][selectData[j][0]] = genRandString(7);
+            manipulatedData[i][selectData[j][0]] = genRandString(Math.random() * 100);
           }
           if (selectData[j][1] == "num" && selectData[j][2] == "genRand") {
             manipulatedData[i][selectData[j][0]] = genRandNum(5);
